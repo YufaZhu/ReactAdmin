@@ -8,8 +8,12 @@ import {
     Input,
     Icon,
     Button,
+    message
 } from 'antd'
 import {reqLogin} from './../../api'
+import memoryUtils from '../../utils/memoryUtils'
+import storageUtils from '../../utils/storageUtils'
+import {Redirect} from 'react-router-dom'
 
 const Item = Form.Item
 class Login extends Component {
@@ -19,21 +23,31 @@ class Login extends Component {
         e.preventDefault()
         // 进行表单所有控件的校验
         this.props.form.validateFields(async (err, values) => {
-            if (!err) {
-                const {username, password} = values
-                try {
-                    // 校验成功
-                    const response = await reqLogin(username, password)
-                    console.log('请求成功',response.data)
-                } catch (error) {
-                    console.log('请求出错',error) 
-                }
+        // 检验成功
+        if (!err) {
+            // console.log('提交登陆的 ajax 请求', values)
+            const {username, password} = values
+            const result = await reqLogin(username, password)
+            // console.log('login()', result)
+            if(result.status === 0) {
+                // 提示登录成功
+                message.success('登录成功', 2)
+                // 保存用户登录信息,保存到内存中,但是并不能永久保存，一旦刷新，状态就会丢失，所以还要保存到本地
+                const user = result.data
+                memoryUtils.user = user 
+                //保存到本地
+                storageUtils.saveUser(user)
+                // 跳转到主页面
+                this.props.history.replace('/')
             } else {
-                // 校验失败
-                console.log(err)
+                // 登录失败, 提示错误
+                message.error(result.msg)
             }
-        })
-    }
+        } else {
+        console.log('检验失败!')
+        }
+    })
+}
 
     //自定义表单的校验规则
     validator=(rule, value, callback)=>{
@@ -51,6 +65,10 @@ class Login extends Component {
         }
     }
     render() {
+        // 如果用户已经登陆, 自动跳转到 admin
+        if (memoryUtils.user && memoryUtils.user._id) {
+            return <Redirect to='/'/>
+        }
         const form = this.props.form
         const {getFieldDecorator} = form
         return (
