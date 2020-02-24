@@ -21,3 +21,11 @@ export const reqWeather=(city)=> {
         })
     })
 }
+
+//获得一级/二级分类列表
+export const reqCategorys = (parentId)=>ajax('/manage/category/list',{parentId});
+//添加分类
+export const reqAddCategory = (categoryName,parentId)=>ajax('/manage/category/add',{categoryName,parentId},'POST')
+//更新分类   ({categoryId,categoryName}),(categoryId,categoryName),参数里面这两种写法都可以，
+//前一种是对象，取出结果需要结构，后者直接就是参数
+export const reqUpdateCategory = ({categoryId,categoryName})=>ajax('/manage/category/update',{categoryId,categoryName},'POST')

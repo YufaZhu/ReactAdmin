@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
+import './index.less'
 
 class Home extends Component {
     
     render() { 
         return ( 
-            <div>
-                Home
+            <div className="home">
+                欢迎使用硅谷后台
             </div>
          );
     }
