@@ -1,114 +1,217 @@
 import React, { Component } from 'react';
-import {Button,Card,Icon,Table,message} from 'antd';
+import { Button, Card, Icon, Table, message, Modal } from 'antd';
 import LinkButton from './../../components/link-button'
-import {reqCategorys} from './../../api'
+import { reqCategorys, reqUpdateCategory, reqAddCategory } from './../../api'
+import AddForm from './add-form'
+import UpdateForm from './update-form'
 
 class Category extends Component {
-    
-    state={
-        categorys:[],       //一级分类列表
-        loading:false,
-        parentId:'0',       //当前需要显示的分类列表的父分类ID
-        parentName:'',      //当前需要显示的分类列表的父分类名称
-        subCategorys:[],    //二级分类列表
+
+    state = {
+        categorys: [],       //一级分类列表
+        loading: false,
+        parentId: '0',       //当前需要显示的分类列表的父分类ID
+        parentName: '',      //当前需要显示的分类列表的父分类名称
+        subCategorys: [],    //二级分类列表
+        showStatus: 0, // 是否显示对话框 0: 都不显示, 1: 显示添加, 2: 显示更新
     }
-    
-    initColumns=()=>{
+
+    initColumns = () => {
         this.columns = [
             {
-              title: '分类的名称',
-              dataIndex: 'name',
+                title: '分类的名称',
+                dataIndex: 'name',
             },
             {
-              title: '操作',
-              width:"300px",
-              render:(category)=>(
-                  <span>
-                      <LinkButton>修改分类</LinkButton>
-                      {/* 如何向事件回调函数传递参数，先定义一个匿名箭头函数，在通过匿名函数调用处理的函数传入参数 */}
-                      {/* 查看子分类只有在一级列表才会显示，二级列表就没有了，所以可以用三目运算 */}
-                      {this.state.parentId==='0' ? <LinkButton onClick={()=>this.showSubCategorys(category)}>查看子分类</LinkButton>:null}
-                  </span>
-              )
+                title: '操作',
+                width: "300px",
+                render: (category) => (
+                    <span>
+                        <LinkButton onClick={() => this.showUpdate(category)}>修改分类</LinkButton>
+                        {/* 如何向事件回调函数传递参数，先定义一个匿名箭头函数，在通过匿名函数调用处理的函数传入参数 */}
+                        {/* 查看子分类只有在一级列表才会显示，二级列表就没有了，所以可以用三目运算 */}
+                        {this.state.parentId === '0' ? <LinkButton onClick={() => this.showSubCategorys(category)}>查看子分类</LinkButton> : null}
+                    </span>
+                )
             }
-          ];
+        ];
     }
     //显示一级/二级列表数据
-    getCategorys=async()=>{
+    getCategorys = async (parentId) => {
         //请求数据前显示loading
-        this.setState({loading:true})
-        const {parentId} = this.state
+        this.setState({ loading: true })
+        parentId = parentId || this.state.parentId
         const result = await reqCategorys(parentId);
         //请求数据后不显示loading
-        this.setState({loading:false})
-        if(result.status===0){
+        this.setState({ loading: false })
+        if (result.status === 0) {
             const categorys = result.data;
-            if(parentId==='0'){
-                this.setState({categorys:categorys})
-            }else{
-                this.setState({subCategorys:categorys})
+            if (parentId === '0') {
+                this.setState({ categorys: categorys })
+            } else {
+                this.setState({ subCategorys: categorys })
             }
-            
-        }else{
+
+        } else {
             message.error('获取列表失败')
         }
 
     }
     //显示指定的一级列表的二级列表数据
-    showSubCategorys=(category)=>{
+    showSubCategorys = (category) => {
         this.setState({
-            parentId:category._id,
-            parentName:category.name
-        },()=>{//在状态更新且重新render后执行，因为setState是异步更新数据的
+            parentId: category._id,
+            parentName: category.name
+        }, () => {//在状态更新且重新render后执行，因为setState是异步更新数据的
             this.getCategorys()
         })
     }
 
-    showCategorys=()=>{
+    showCategorys = () => {
         this.setState({
-            parentId:'0',
-            parentName:'',
-            subCategorys:[]
+            parentId: '0',
+            parentName: '',
+            subCategorys: []
         })
     }
 
-    componentWillMount(){
+    //显示添加确认框
+    showAdd = () => {
+        this.setState({
+            showStatus: 1
+        })
+    }
+
+    //添加分类
+    addCategory = () => {
+        this.form.validateFields(async(err,values)=>{
+            if (!err) {
+                this.setState({
+                    showStatus: 0
+                })
+                const { parentId, categoryName } = this.form.getFieldsValue()
+                this.form.resetFields()
+                const result = await reqAddCategory(categoryName, parentId)
+                if (result.status === 0) {
+                    if (parentId === this.state.parentId) {
+                        this.getCategorys()
+                    } else if (parentId === '0') {
+                        this.getCategorys('0')
+                    }
+                }
+            }
+        })
+        
+    }
+
+    //显示修改确认框
+    showUpdate = (category) => {
+        this.category = category
+        this.setState({
+            showStatus: 2
+        })
+    }
+
+    //修改分类
+    updateCategory = () => {
+        this.form.validateFields(async(err, values) => {
+            if (!err) {
+                //1.隐藏确认框
+                this.setState({
+                    showStatus: 0
+                })
+                //2.发请求更新分类
+                const categoryId = this.category._id
+                const {categoryName} = values
+                //const categoryName = this.form.getFieldValue('categoryName')
+                //清除输入的数据
+                this.form.resetFields()
+
+                const result = await reqUpdateCategory({ categoryId, categoryName })
+                if (result.status === 0) {
+                    //3.重新显示列表
+                    this.getCategorys()
+                }
+            }
+        })
+
+
+
+    }
+
+    //隐藏确认框
+    handleCancel = () => {
+        //清除输入的数据
+        this.form.resetFields()
+
+        this.setState({ showStatus: 0 })
+    }
+    componentWillMount() {
         this.initColumns()
     }
-    
-    componentDidMount(){
+
+    componentDidMount() {
         this.getCategorys()
     }
 
-    render() { 
-        const {categorys,subCategorys,parentId,loading,parentName} = this.state
-        const title = parentId==='0' ? '一级分类列表':(
+    render() {
+        const { categorys, subCategorys, parentId, loading, parentName, showStatus } = this.state
+        const category = this.category || {}
+        const title = parentId === '0' ? '一级分类列表' : (
             <span>
                 <LinkButton onClick={this.showCategorys}>一级分类列表</LinkButton>
-                <Icon type="arrow-right" style={{marginRight:5}}/>
+                <Icon type="arrow-right" style={{ marginRight: 5 }} />
                 <span>{parentName}</span>
             </span>
         );
         const extra = (
-        <Button type="primary">
-            <Icon type='plus'></Icon>
-            添加
+            <Button type="primary" onClick={this.showAdd}>
+                <Icon type='plus'></Icon>
+                添加
         </Button>
         );
 
-        return ( 
+        return (
             <Card title={title} extra={extra}>
-                <Table 
-                dataSource={parentId==='0'?categorys:subCategorys} 
-                columns={this.columns} 
-                bordered
-                rowKey='_id'
-                pagination={{defaultPageSize:5,showQuickJumper:true}}
-                loading={loading}
+                <Table
+                    dataSource={parentId === '0' ? categorys : subCategorys}
+                    columns={this.columns}
+                    bordered
+                    rowKey='_id'
+                    pagination={{ defaultPageSize: 5, showQuickJumper: true }}
+                    loading={loading}
                 />;
+
+                    <Modal
+                    title="添加分类"
+                    visible={showStatus === 1}
+                    onOk={this.addCategory}
+                    onCancel={this.handleCancel}
+                >
+                    <AddForm
+                        categorys={categorys}
+                        parentId={parentId}
+                        setForm={(form) => { this.form = form }}
+                    />
+
+                </Modal>
+
+                <Modal
+                    title="更新分类"
+                    visible={showStatus === 2}
+                    onOk={this.updateCategory}
+                    onCancel={this.handleCancel}
+                >
+                    <UpdateForm
+                        categoryName={category.name}
+                        setForm={(form) => { this.form = form }}
+                    />
+
+                </Modal>
             </Card>
-         );
+
+        );
     }
 }
- 
+
 export default Category;
