@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import {Card,Table,Select,Input,Button,Icon} from 'antd'
+import {Card,Table,Select,Input,Button,Icon,message} from 'antd'
 import LinkButton from './../../components/link-button'
-import { reqProducts, reqSearchProducts } from './../../api'
+import { reqProducts, reqSearchProducts, reqUpdateStatus } from './../../api'
 import {PAGE_SIZE} from './../../utils/constants'
 
 const Option = Select.Option
@@ -13,6 +13,14 @@ class ProductHome extends Component {
         total:0,
         searchType:'productName', // 搜索类型 productName / productDesc
         searchName:'',  // 搜索关键字
+    }
+
+    updateStatus= async(productId,status)=>{
+        const result = await reqUpdateStatus(productId,status);
+        if(result.status===0){
+            message.success('更新商品状态成功')
+            this.getProducts(this.pageNum)
+        }
     }
 
     initColumns=()=>{
@@ -33,12 +41,15 @@ class ProductHome extends Component {
             {
               width:100,
               title: '状态',
-              dataIndex: 'status',
-              render:(status)=>{
+              //dataIndex: 'status',
+              render:(product)=>{
+                  const {status,_id} = product
                   return(
                       <span>
-                        <Button type='primary'>下架</Button>
-                        <span>在售</span>
+                        <Button type='primary' onClick={()=>this.updateStatus(_id,status===1?2:1)}>
+                            {status===1 ? '下架':'上架'}
+                        </Button>
+                        <span>{status===1 ? '在售':'已下架'}</span>
                       </span>
                   )
               }
@@ -60,6 +71,8 @@ class ProductHome extends Component {
     }
 
     getProducts=async(pageNum)=>{
+        //保存pageNum，让其他方法可以看到
+        this.pageNum = pageNum
         const {searchType,searchName} = this.state
         let result;
         if(searchName){

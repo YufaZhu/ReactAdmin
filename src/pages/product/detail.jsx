@@ -2,13 +2,44 @@ import React, { Component } from 'react';
 import {Card,Icon,List} from 'antd';
 import {BASE_IMG_URL} from '../../utils/constants'
 import LinkButton from "../../components/link-button";
-
+import {reqCategory, reqUpdateStatus} from './../../api'
 
 class ProductDetail extends Component {
     
+    state={
+        cName1:'',
+        cName2:'',
+    }
+
+    async componentWillMount(){
+        const {pCategoryId,categoryId} = this.props.location.state.product;
+        if(pCategoryId==='0'){
+            const result = await reqCategory(categoryId)
+            const cName1=result.data.name;
+            this.setState({cName1})
+        }else{
+            // 1，这个方式也可以
+            // const result1 = await reqCategory(pCategoryId)
+            // const result2 = await reqCategory(categoryId)
+            // const cName1=result1.data.name;
+            // const cName2=result2.data.name;
+            // this.setState({cName1,cName2})
+            //2，这个方式也可以
+            const results = Promise.all([await reqCategory(pCategoryId),await reqCategory(categoryId)]);
+            const cName1 = results[0].data.name
+            const cName2 = results[1].data.name
+            this.setState({
+                cName1,
+                cName2
+            })
+        }
+    }
+
+
     render() {
         
         const {name,desc,price,detail,imgs} = this.props.location.state.product
+        const {cName1,cName2} = this.state
 
         const title = (
             <span>
@@ -40,7 +71,7 @@ class ProductDetail extends Component {
                     </List.Item>
                     <List.Item>
                         <span className='left'>所属分类:</span>
-                        <span></span>
+                        <span>{cName1} {cName2 ? '-->'+cName2:''}</span>
                     </List.Item>
                     <List.Item>
                         <span className='left'>商品图片:</span>
