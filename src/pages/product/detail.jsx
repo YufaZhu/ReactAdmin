@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {Card,Icon,List} from 'antd';
 import {BASE_IMG_URL} from '../../utils/constants'
 import LinkButton from "../../components/link-button";
-import {reqCategory, reqUpdateStatus} from './../../api'
+import {reqCategory} from './../../api'
 
 class ProductDetail extends Component {
     

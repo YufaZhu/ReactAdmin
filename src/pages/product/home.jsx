@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {Card,Table,Select,Input,Button,Icon,message} from 'antd'
 import LinkButton from './../../components/link-button'
-import { reqProducts, reqSearchProducts, reqUpdateStatus } from './../../api'
+import { reqProducts, reqSearchProducts,reqUpdateProductStatus } from './../../api'
 import {PAGE_SIZE} from './../../utils/constants'
 
 const Option = Select.Option
@@ -16,7 +16,7 @@ class ProductHome extends Component {
     }
 
     updateStatus= async(productId,status)=>{
-        const result = await reqUpdateStatus(productId,status);
+        const result = await reqUpdateProductStatus(productId,status);
         if(result.status===0){
             message.success('更新商品状态成功')
             this.getProducts(this.pageNum)
@@ -125,7 +125,7 @@ class ProductHome extends Component {
         )
 
         const extra=(
-            <Button type='primary'>
+            <Button type='primary' onClick={()=>this.props.history.push('/product/addupdate')}>
                 <Icon type='plus' />
                 添加商品
             </Button>

@@ -40,8 +40,8 @@ export const reqSearchProducts = ({pageNum,pageSize,searchType,searchName})=>aja
     [searchType]:searchName})
 
 //根据分类Id获取分类
-export const reqCategory = (categoryId)=>ajax('/manage/category/info',{categoryId})
+export const reqCategory = (categoryId)=>ajax('/manage/category/info',{categoryId});
 
 //更新商品的状态（上架或下架的处理）
-export const reqUpdateStatus = (productId,status)=ajax('/manage/product/updateStatus',{productId,status},'POST')
+export const reqUpdateProductStatus = (productId, status) =>ajax('/manage/product/updateStatus', {productId,status}, 'POST')
 
