@@ -45,3 +45,5 @@ export const reqCategory = (categoryId)=>ajax('/manage/category/info',{categoryI
 //更新商品的状态（上架或下架的处理）
 export const reqUpdateProductStatus = (productId, status) =>ajax('/manage/product/updateStatus', {productId,status}, 'POST')
 
+//删除图片
+export const reqDeleteImg = (name)=>ajax('/manage/img/delete',{name}, 'POST')

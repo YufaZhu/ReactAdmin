@@ -2,11 +2,20 @@ import React, { Component } from 'react';
 import { Card, Form, Input, Cascader, Upload, Button, Icon } from 'antd'
 import LinkButton from './../../components/link-button'
 import { reqCategorys } from './../../api'
+import PicturesWall from './pictures-wall'
+import RichTextEditor from './rich-text-editor'
 
 const { Item } = Form
 const { TextArea } = Input
 
 class ProductAddUpdate extends Component {
+
+    constructor(props){
+        super(props)
+        //创建用来保存ref标识的标签对象的容器
+        this.pw = React.createRef()
+        this.editor = React.createRef()
+    }
 
     state = {
         options: [], // 用来显示级联列表的数组
@@ -85,9 +94,11 @@ class ProductAddUpdate extends Component {
     };
 
     submit = () => {
-        this.props.form.validateFields((err, value) => {
+        this.props.form.validateFields((err, values) => {
             if (!err) {
-
+                const imgs = this.pw.current.getImgs()
+                const detail = this.editor.current.getDetail()
+                console.log('imgswww',imgs)
             }
         })
     }
@@ -133,7 +144,7 @@ class ProductAddUpdate extends Component {
         const { getFieldDecorator } = this.props.form
 
         const categoryIds = []
-        const { pCategoryId, categoryId } = product
+        const { pCategoryId, categoryId ,imgs,detail} = product
         if (isUpade) {
             if (pCategoryId === '0') {
                 categoryIds.push(categoryId)
@@ -194,10 +205,10 @@ class ProductAddUpdate extends Component {
                         }
                     </Item>
                     <Item label='商品图片'>
-                        <div></div>
+                        <PicturesWall ref={this.pw} imgs={imgs}/>
                     </Item>
-                    <Item label='商品详情'>
-                        <div></div>
+                    <Item label='商品详情' labelCol={{span: 2}} wrapperCol={{ span: 20 }}>
+                        <RichTextEditor ref={this.editor} detail={detail}/>
                     </Item>
                     <Item>
                         <Button type='primary' onClick={this.submit}>提交</Button>
