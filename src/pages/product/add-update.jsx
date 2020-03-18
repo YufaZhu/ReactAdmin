@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { Card, Form, Input, Cascader, Upload, Button, Icon } from 'antd'
+import { Card, message,Form, Input, Cascader, Upload, Button, Icon } from 'antd'
 import LinkButton from './../../components/link-button'
-import { reqCategorys } from './../../api'
+import { reqCategorys,reqAddOrUpdateProduct } from './../../api'
 import PicturesWall from './pictures-wall'
 import RichTextEditor from './rich-text-editor'
 
@@ -94,11 +94,31 @@ class ProductAddUpdate extends Component {
     };
 
     submit = () => {
-        this.props.form.validateFields((err, values) => {
+        this.props.form.validateFields(async(err, values) => {
             if (!err) {
                 const imgs = this.pw.current.getImgs()
                 const detail = this.editor.current.getDetail()
-                console.log('imgswww',imgs)
+                const {name,desc,price,categoryIds} = values
+                let pCategoryId,categoryId;
+                if(categoryIds.length===1){
+                    pCategoryId='0'
+                    categoryId=categoryIds[0]
+                }else{
+                    pCategoryId = categoryIds[0]
+                    categoryId = categoryIds[1]
+                }
+                const product = {name,desc,price,pCategoryId,categoryId,detail,imgs}
+                if(this.isUpade){
+                    product._id = this.product._id
+                }
+
+                const result = await reqAddOrUpdateProduct(product)
+                if(result.status===0){
+                    message.success(`${this.isUpade?'更新':'添加'}商品成功`)
+                    this.props.history.goBack()
+                }else{
+                    message.error(`${this.isUpade?'更新':'添加'}商品失败`)
+                }
             }
         })
     }
