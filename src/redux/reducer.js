@@ -4,7 +4,7 @@ import {combineReducers} from 'redux'
 
 //用来管理头部标题的reducer函数
 const initHeaderTitle = '首页'
-function headerTitle(state=initHeaderTitle,action){
+function headTitle(state=initHeaderTitle,action){
     switch(action.type){
         case SET_HEADER_TITLE:
             return action.data
@@ -25,6 +25,6 @@ function user(state=initUser,action){
 }
 
 export default combineReducers({
-    headerTitle,
+    headTitle,
     user
 })
