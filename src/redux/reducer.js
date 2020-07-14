@@ -1,4 +1,4 @@
-import {SET_HEADER_TITLE} from './action-type'
+import {SET_HEAD_TITLE} from './action-type'
 import storageUtils from '../utils/storageUtils'
 import {combineReducers} from 'redux'
 
@@ -6,7 +6,7 @@ import {combineReducers} from 'redux'
 const initHeaderTitle = '首页'
 function headTitle(state=initHeaderTitle,action){
     switch(action.type){
-        case SET_HEADER_TITLE:
+        case SET_HEAD_TITLE:
             return action.data
         default:
             return state
