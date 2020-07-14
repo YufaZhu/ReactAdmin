@@ -38,7 +38,7 @@ class Login extends Component {
                 //保存到本地
                 storageUtils.saveUser(user)
                 // 跳转到主页面
-                this.props.history.replace('/')
+                this.props.history.replace('/home')
             } else {
                 // 登录失败, 提示错误
                 message.error(result.msg)
