@@ -4,6 +4,8 @@ import { Link ,withRouter} from 'react-router-dom'
 import { Menu, Icon } from 'antd';
 import logo from './../../assets/images/logo.png'
 import menuList from './../../config/menuConfig' 
+import {connect} from 'react-redux'
+import {setHeadTitle} from '../../redux/actions'
 
 const { SubMenu } = Menu;
 class LeftNav extends Component {
@@ -12,9 +14,14 @@ class LeftNav extends Component {
         const path = this.props.location.pathname
         return menuList.map(item=>{
             if(!item.children){
+                //判断item是否是当前对应的item
+                if(item.title===path || path.indexOf(item.key)===0){
+                    //更新redux中的headerTitle状态
+                    this.props.setHeadTitle(item.title)
+                }
                 return(
                     <Menu.Item key={item.key}>
-                        <Link to={item.key}>
+                        <Link to={item.key} onClick={()=>this.props.setHeadTitle(item.title)}>
                             <Icon type={item.icon} />
                             <span>{item.title}</span>
                         </Link>
@@ -79,4 +86,7 @@ class LeftNav extends Component {
     }
 }
 
-export default withRouter(LeftNav);
+export default connect(
+    state=>({}),
+    {setHeadTitle}
+)(withRouter(LeftNav));
