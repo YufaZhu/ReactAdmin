@@ -1,7 +1,7 @@
 /*后台管理主路由组件
 */
 import React, {Component} from 'react'
-import memoryUtils from '../../utils/memoryUtils'
+//import memoryUtils from '../../utils/memoryUtils'
 import {Redirect,Route,Switch} from 'react-router-dom'
 import { Layout } from 'antd';
 import Header from './../../components/header'
@@ -14,12 +14,14 @@ import User from '../user/user'
 import Bar from '../charts/bar'
 import Line from '../charts/line'
 import Pie from '../charts/pie'
+import {connect} from 'react-redux'
 
 
 const { Footer, Sider, Content } = Layout;
 class Admin extends Component {
     render () {
-        const user = memoryUtils.user
+        //const user = memoryUtils.user
+        const user = this.props.user
         if(!user || !user._id){
             return <Redirect to='/login'/>
         }
@@ -51,4 +53,7 @@ class Admin extends Component {
         )
     }
 }
-export default Admin
+export default connect(
+    state=>({user:state.user}),
+    {}
+)(Admin)
