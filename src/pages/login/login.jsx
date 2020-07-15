@@ -10,10 +10,12 @@ import {
     Button,
     message
 } from 'antd'
-import {reqLogin} from './../../api'
-import memoryUtils from '../../utils/memoryUtils'
-import storageUtils from '../../utils/storageUtils'
+// import {reqLogin} from './../../api'
+// import memoryUtils from '../../utils/memoryUtils'
+// import storageUtils from '../../utils/storageUtils'
 import {Redirect} from 'react-router-dom'
+import {connect} from 'react-redux'
+import {login} from './../redux/actions'
 
 const Item = Form.Item
 class Login extends Component {
@@ -25,24 +27,27 @@ class Login extends Component {
         this.props.form.validateFields(async (err, values) => {
         // 检验成功
         if (!err) {
-            // console.log('提交登陆的 ajax 请求', values)
-            const {username, password} = values
-            const result = await reqLogin(username, password)
-            // console.log('login()', result)
-            if(result.status === 0) {
-                // 提示登录成功
-                message.success('登录成功', 2)
-                // 保存用户登录信息,保存到内存中,但是并不能永久保存，一旦刷新，状态就会丢失，所以还要保存到本地
-                const user = result.data
-                memoryUtils.user = user 
-                //保存到本地
-                storageUtils.saveUser(user)
-                // 跳转到主页面
-                this.props.history.replace('/home')
-            } else {
-                // 登录失败, 提示错误
-                message.error(result.msg)
-            }
+            //redux的方式实现
+            this.props.login(username,password)
+            // // console.log('提交登陆的 ajax 请求', values)
+            // const {username, password} = values
+            // const result = await reqLogin(username, password)
+            // // console.log('login()', result)
+            // if(result.status === 0) {
+            //     // 提示登录成功
+            //     message.success('登录成功', 2)
+            //     // 保存用户登录信息,保存到内存中,但是并不能永久保存，一旦刷新，状态就会丢失，所以还要保存到本地
+            //     const user = result.data
+            //     memoryUtils.user = user 
+            //     //保存到本地
+            //     storageUtils.saveUser(user)
+            //     // 跳转到主页面
+            //     this.props.history.replace('/')
+            // } else {
+            //     // 登录失败, 提示错误
+            //     message.error(result.msg)
+            // }
+
         } else {
         console.log('检验失败!')
         }
@@ -66,9 +71,15 @@ class Login extends Component {
     }
     render() {
         // 如果用户已经登陆, 自动跳转到 admin
-        if (memoryUtils.user && memoryUtils.user._id) {
-            return <Redirect to='/'/>
+        const user = this.props.user
+        if (user && user._id) {
+            return <Redirect to='/home'/>
         }
+
+        const errorMsg = this.props.user.errorMsg
+        // if (memoryUtils.user && memoryUtils.user._id) {
+        //     return <Redirect to='/'/>
+        // }
         const form = this.props.form
         const {getFieldDecorator} = form
         return (
@@ -78,6 +89,7 @@ class Login extends Component {
                     <h1>React 项目: 后台管理系统</h1>
                 </header>
                 <section className='login-content'>
+                    <div className={user.errorMsg ? 'error-msg show':'error-msg'}>{errorMsg}</div>
                     <h3>用户登陆</h3>
                     <Form onSubmit={this.login} className="login-form">
                         <Item>
@@ -122,4 +134,7 @@ class Login extends Component {
 }
 //为了拿到antd Form表单里强大的form参数
 const WarpLogin = Form.create()(Login)
-export default WarpLogin;
+export default connect(
+    state=>({user:state.user}),
+    {login}
+)(WarpLogin);
