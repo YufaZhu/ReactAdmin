@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
 import './index.less'
 import {formateDate} from './../../utils/dateUtils'
-import memoryUtils from './../../utils/memoryUtils'
-import storageUtils from './../../utils/storageUtils'
+//import memoryUtils from './../../utils/memoryUtils'
+//import storageUtils from './../../utils/storageUtils'
 import {reqWeather} from './../../api'
 import {withRouter} from 'react-router-dom'
 import menuList from './../../config/menuConfig';
 import {Modal} from 'antd'
 import LinkButton from './../../components/link-button'
 import {connect} from 'react-redux'
+import {logout} from './../redux/actions'
 
 class Header extends Component {
 
@@ -53,8 +54,9 @@ class Header extends Component {
         Modal.confirm({
             content: '确定要退出吗？',
             onOk:()=> {
-                storageUtils.removeUser();
-                memoryUtils.user={}
+                //storageUtils.removeUser();
+                //memoryUtils.user={}
+                this.props.logout()
                 this.props.history.replace('/login')
             }
           });
@@ -70,7 +72,8 @@ class Header extends Component {
     
     render() { 
         const {currentTime,dayPictureUrl,weather} = this.state
-        const username = memoryUtils.user.username
+        //const username = memoryUtils.user.username
+        const username = this.props.user.username
         //const title = this.getTitle()
         //用redux的方式实现
         const title = this.props.headTitle
@@ -96,6 +99,6 @@ class Header extends Component {
 }
  
 export default connect(
-    state=>({headTitle:state.headTitle}),
-    {}
+    state=>({headTitle:state.headTitle,user:state.user}),
+    {logout}
 )(withRouter(Header));
